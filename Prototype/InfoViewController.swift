@@ -59,14 +59,15 @@ class InfoViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         }
 
     }
+    
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String: Any])
     {
         let image = info[UIImagePickerControllerOriginalImage] as! UIImage
         
-        taskImg.image = image
-        
         picker.dismiss(animated: true, completion: nil)
     }
+    
+    func transitionTo()
     
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
@@ -102,7 +103,9 @@ class InfoViewController: UIViewController, UIImagePickerControllerDelegate, UIN
         // Dispose of any resources that can be recreated.
     }
     
-
+    func navigationController(navigationController: UINavigationController, willShowViewController viewController: UIViewController, animated: Bool) {
+        viewController.navigationItem.title = "Some title"
+    }
     /*
     // MARK: - Navigation
 
