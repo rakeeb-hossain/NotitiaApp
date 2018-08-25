@@ -23,22 +23,38 @@ struct Info {
 }
 
 class HomeViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    @IBOutlet weak var balanceText: UILabel!
-
-    @IBOutlet weak var taskTable: UITableView!
     
+    let balanceTextBackgroundView = UIView()
+    let balanceText = UILabel.create("120 c", .rgb(216,158,0), .mainFont(.semiBold, 18.scaled))
+    let taskTitleLabel = UILabel.create("Tasks", .white, .mainFont(.semiBold, 36.scaled))
+    let taskTable = UITableView()
+    let topBar = UIView()
     let db = Firestore.firestore()
     var count = 0
-    var arr: [Info] = []
+    var arr: [Info] = [
+        Info(type: "", title: "Take a selfie!", reward: 20, description1: "", description2: "", imgRef1: "", imgRef2: ""),
+        Info(type: "", title: "How funny are these cards?", reward: 10, description1: "", description2: "", imgRef1: "", imgRef2: ""),
+        Info(type: "", title: "Take picture of fire hydrants", reward: 10, description1: "", description2: "", imgRef1: "", imgRef2: "")
+    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        topBar.backgroundColor = .black
+        topBar.addToView(self.view, .left, .right, .top, .height(78.scaled.constant))
+        taskTitleLabel.addToView(topBar, .centerX, .centerY)
+        taskTable.separatorColor = .clear
+        taskTable.register(TaskCell.self, forCellReuseIdentifier: "TaskCell")
+        balanceTextBackgroundView.backgroundColor = .white
+        balanceTextBackgroundView.addToView(topBar, .right(20.scaled.pad), .width(0.2.ratio), .height(taskTitleLabel.height, 0.8.ratio), .centerY)
+        
+        balanceText.addToView(balanceTextBackgroundView, .centerX, .centerY)
+        taskTable.addToView(self.view, .left, .right, .top(topBar.bottom), .bottom)
         self.taskTable.delegate = self
         self.taskTable.dataSource = self
         
         // Count number of tasks
 
-        db.collection("users").getDocuments()
+        /*db.collection("users").getDocuments()
             {
                 (querySnapshot, err) in
                 
@@ -125,17 +141,21 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         }
         
         
-        
+        */
         // Do any additional setup after loading the view.
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        balanceTextBackgroundView.layer.cornerRadius = balanceTextBackgroundView.frame.height / 2
+    }
+    
     func numberOfSections(in taskTable: UITableView) -> Int {
-        print(arr.count)
-        return arr.count
+        return 1
     }
     
     func tableView(_ taskTable: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        return arr.count
     }
     func tableView(_ taskTable: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 20
@@ -149,12 +169,27 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func tableView(_ taskTable: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = taskTable.dequeueReusableCell(withIdentifier: "taskList", for: indexPath)
-        
-        cell.textLabel?.text = arr[indexPath.section].title
-        cell.clipsToBounds = true
-        cell.layer.cornerRadius = 30
-        
+        guard let cell = taskTable.dequeueReusableCell(withIdentifier: "TaskCell", for: indexPath) as? TaskCell else { return UITableViewCell() }
+        cell.titleLabel.text = arr[indexPath.row].title
+        print("row: \(indexPath.row)")
+        cell.ptsLabel.text = "\(arr[indexPath.row].reward) c"
+        if indexPath.row == 0 {
+            cell.numeratorLabel.text = "4"
+            cell.denominatorLabel.text = "20"
+        }
+        else if indexPath.row == 1 {
+            cell.numeratorLabel.text = "8"
+            cell.denominatorLabel.text = "10"
+        }
+        else if indexPath.row == 2 {
+            cell.numeratorLabel.text = "8"
+            cell.denominatorLabel.text = "8"
+            cell.numeratorLabel.textColor = .rgb(206,206,206)
+            cell.denominatorLabel.textColor = .rgb(206,206,206)
+            cell.titleLabel.textColor = .rgb(206,206,206)
+            cell.ptsLabel.textColor = .rgb(206,206,206)
+            cell.separatorView.backgroundColor = .rgb(51,219,0)
+        }
         
         return cell
     }
